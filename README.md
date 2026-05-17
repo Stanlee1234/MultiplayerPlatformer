@@ -16,7 +16,7 @@ To play or test this game, you will need:
 2. Go to **Debug > Run Multiple Instances** at the top of the editor and set it to **2 instances**.
 3. Press **F5** (or the Play button) to run the game. Two windows will pop up.
 4. On Window 1, click **Host**.
-5. On Window 2, leave the IP blank (or type `127.0.0.1`) and click **Join**.
+5. On Window 2, click **Join**.
 ---
 
 ##  Controls
