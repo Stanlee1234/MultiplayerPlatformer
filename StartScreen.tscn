@@ -1,0 +1,27 @@
+[gd_scene format=3 uid="uid://n2717w75lqoo"]
+
+[ext_resource type="Script" uid="uid://cuud2p25ts1jw" path="res://multiplayer.gd" id="1_mqr7l"]
+
+[node name="StartScreen" type="Node2D" unique_id=428071412]
+script = ExtResource("1_mqr7l")
+
+[node name="Host" type="Button" parent="." unique_id=1903037322]
+offset_left = 560.0
+offset_top = 304.0
+offset_right = 608.0
+offset_bottom = 335.0
+text = "Host"
+
+[node name="Join" type="Button" parent="." unique_id=280739115]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 560.0
+offset_top = 344.0
+offset_right = 608.0
+offset_bottom = 375.0
+grow_vertical = 0
+text = "Join"
+
+[connection signal="pressed" from="Host" to="." method="_on_host_pressed"]
+[connection signal="pressed" from="Join" to="." method="_on_join_pressed"]
