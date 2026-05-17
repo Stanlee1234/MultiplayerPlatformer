@@ -3,14 +3,12 @@ extends CharacterBody2D
 const SPEED = 150.0
 const CROUCH_SPEED = 75.0
 const ROLL_SPEED = 200.0
-const JUMP_VELOCITY = -300.0
-const WALL_SLIDE_SPEED = 100.0 
+const JUMP_VELOCITY = -350.0
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 
 var is_rolling: bool = false
-var is_wall_landing: bool = false
-var was_on_wall: bool = false
+var double_jump_available: bool = false
 
 func _enter_tree() -> void:
 	set_multiplayer_authority(name.to_int())
@@ -26,7 +24,7 @@ func _ready() -> void:
 		camera.make_current()
 		z_index = 10
 		if player_id == 1:
-			sprite.modulate = Color(1.0, 0.85, 0.3) 
+			sprite.modulate = Color(0.78, 0.259, 0.468, 1.0) 
 	else:
 		camera.enabled = false
 		z_index = 1
@@ -49,25 +47,25 @@ func _physics_process(delta: float) -> void:
 
 	var direction := Input.get_axis("left", "right")
 	
-	# Cancel wall landing early if we let go of the direction
-	if not is_on_wall_only() or direction == 0:
-		is_wall_landing = false
+	# Reset double jump when on the floor
+	if is_on_floor():
+		double_jump_available = true
 
-	# 2. Gravity & Wall Sliding
+	# 2. Gravity
 	if not is_on_floor():
-		if is_on_wall_only() and velocity.y > 0 and direction != 0:
-			velocity.y = WALL_SLIDE_SPEED 
-		else:
-			velocity += get_gravity() * delta
+		velocity += get_gravity() * delta
 
-	# 3. Handle Jump
+	# 3. Handle Jump & Double Jump
 	if Input.is_action_just_pressed("up"):
-		is_wall_landing = false 
 		if is_on_floor():
 			velocity.y = JUMP_VELOCITY
-		elif is_on_wall_only():
+		elif double_jump_available:
 			velocity.y = JUMP_VELOCITY
-			velocity.x = get_wall_normal().x * SPEED * 2.0
+			double_jump_available = false # Consume the double jump
+			
+			# Force the animation to restart for the mid-air jump
+			sprite.stop() 
+			sprite.play("jump_spin")
 
 	# 4. Handle Roll vs. Crouch Logic
 	var is_crouching := false
@@ -88,25 +86,17 @@ func _physics_process(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, 0, SPEED)
 
 	move_and_slide()
-
-	# --- Check for Wall Impact ---
-	if is_on_wall_only() and not was_on_wall and velocity.y > 0 and direction != 0:
-		is_wall_landing = true
-		sprite.play("wall_land")
-
 	update_animations(direction, is_crouching)
-	was_on_wall = is_on_wall_only()
 
 
 func update_animations(direction: float, is_crouching: bool) -> void:
-	if is_wall_landing:
-		return
-
 	if not is_on_floor():
-		if is_on_wall_only() and velocity.y > 0 and direction != 0:
-			sprite.play("wall_slide")
-		elif velocity.y < 0:
-			sprite.play("jump")
+		if velocity.y < 0:
+			# If they used the double jump, show the spin. Otherwise, normal jump.
+			if not double_jump_available:
+				sprite.play("jump_spin")
+			else:
+				sprite.play("jump")
 		else:
 			sprite.play("jump_spin") 
 	else:
@@ -123,6 +113,4 @@ func update_animations(direction: float, is_crouching: bool) -> void:
 
 func _on_sprite_animation_finished() -> void:
 	if sprite.animation == "roll":
-		is_rolling = false 
-	elif sprite.animation == "wall_land":
-		is_wall_landing = false
+		is_rolling = false
