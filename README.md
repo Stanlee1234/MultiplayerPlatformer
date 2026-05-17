@@ -1,6 +1,7 @@
 # Multiplayer 2D Platformer Prototype
 
-This project is built in **Godot 4** and features a fully synchronized client-server architecture, smooth state-machine character controllers, and borrowed pixel art animations.
+This project is built in **Godot 4**
+It is a platformer game that you are able to play with your friends.
 ---
 
 ## 🛠️ Prerequisites
